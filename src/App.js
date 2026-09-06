@@ -6,6 +6,7 @@ import image2 from './not_tapped_in.png';
 import image3 from './bro.png';
 import exportAsImage from "./exportAsImage";
 import { getAccessToken, redirectToSpotifyAuth, logout as clearSpotifyAuth } from './auth';
+import AudioPlayer from './AudioPlayer';
 import SpotifyPlaylist from './SpotifyPlaylist'
 
 
@@ -150,6 +151,7 @@ function App() {
 
     const renderObscure = () => {
         if (obscure.length != 0){ //need to put this elsewhere
+            const previewTracks = (topTracks.tracks || []).filter(track => track.preview_url);
             let imagePath = './bro.png';
             if (obscure.popularity <= 50){
                 imagePath = './tapped_in_fasho.png';
@@ -179,17 +181,8 @@ function App() {
                         </div>      
                         </div>
                         
-                        {topTracks.length != 0 && topTracks.tracks[0].preview_url != null ? 
-                        <div className='audio'>
-                                                   <p className='home-small'> Listen to "{topTracks.tracks[0].name}" by {obscure.name} </p>
-                                    <audio controls>
-                                        <source src={topTracks.tracks[0].preview_url} ></source>
-                                    </audio>
-                        </div>
-                        :
-                        <div>
-                            
-                        </div>   
+                        {previewTracks.length > 0 &&
+                            <AudioPlayer tracks={previewTracks} artistName={obscure.name} />
                         }
                          <p class="spotify-trademark">Music data, artist images, and album covers are provided by Spotify.</p> <p class="spotify-trademark"> monk:underground is not affiliated, associated, authorized, endorsed by,or in any way officially connected with Spotify. Spotify is a trademark of Spotify AB.</p> <p class="spotify-trademark">&copy; 2023 monk media</p>
                     </div>
