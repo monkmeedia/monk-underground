@@ -175,7 +175,7 @@ p {
     z-index: 10;
     box-sizing: border-box;
     width: 100%;
-    margin: 0 auto;
+    margin: 0 auto 44px;
     padding: 22px 24px 18px;
     background-color: #fff;
     border-radius: 28px;
