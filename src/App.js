@@ -5,6 +5,7 @@ import image from './tapped_in_fasho.png';
 import image2 from './not_tapped_in.png';
 import image3 from './bro.png';
 import exportAsImage from "./exportAsImage";
+import { getAccessToken, redirectToSpotifyAuth, logout as clearSpotifyAuth } from './auth';
 import SpotifyPlaylist from './SpotifyPlaylist'
 
 
@@ -12,14 +13,8 @@ import SpotifyPlaylist from './SpotifyPlaylist'
 function App() {
 
     const exportRef = useRef();
-    const CLIENT_ID = "d0db6dd1a5ef4b7f8a493a84259ae21c"
-    const REDIRECT_URI = "http://localhost:3000"
-    const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
-    const RESPONSE_TYPE = "token"
-    const show_dialog = "true"
-    const SCOPE = "user-top-read"
-
     const [token, setToken ] = useState("");
+    const [ authError, setAuthError ] = useState("");
     const [artists, setArtists] = useState([]);
     const [obscure, setObscure] = useState([]);
     const [lowID, setLowID] = useState("");
@@ -36,24 +31,27 @@ function App() {
     //let idFound = false;
 
     useEffect( () => {
-        const hash = window.location.hash;
-        let token = window.localStorage.getItem("token"); //localstorage allows us to store key value pairs even after window is closed
-
-        if (!token && hash) { //token is empty and hash is assigned a value
-            token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1]; //& means take everything before the &, [1] means take the second part of the split
-            //console.log(token);
-            window.location.hash = ""; //make it empty again (WHY?)
-            window.localStorage.setItem("token", token);
-        }
-
-        setToken(token);
-        //console.log(token);
+        // Picks up the ?code= Spotify sends back, or reuses/refreshes a token we
+        // already have. See auth.js for the PKCE flow itself.
+        getAccessToken()
+            .then(accessToken => setToken(accessToken || ""))
+            .catch(error => {
+                console.error("Spotify login failed:", error.message);
+                setAuthError(error.message);
+                setToken("");
+            });
 
     }, []);
 
     const logout = () => {
         setToken("");
-        window.localStorage.removeItem("token");
+        clearSpotifyAuth();
+    }
+
+    const login = (event) => {
+        event.preventDefault();
+        setAuthError("");
+        redirectToSpotifyAuth();
     }
 
     useEffect(() => {
@@ -209,7 +207,7 @@ function App() {
                     </h1>
 
                         {!token ?
-                        <a href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&show_dialog=${show_dialog}`}>LOGIN TO SPOTIFY</a>
+                        <a href="/" onClick={login}>LOGIN TO SPOTIFY</a>
                         :
                         <div>
                             <button className='logout' onClick={logout}> LOGOUT </button>
@@ -227,6 +225,7 @@ function App() {
   ) : (
     <div className="homepage">
       <h3>WANNA KNOW YOUR TOP UNDERGROUND ARTIST?</h3>
+      {authError && <p className="home-small">Couldn't sign in to Spotify: {authError}</p>}
       <p className="home-small">
         We define "underground" as artists who are up and coming or outside of
         the mainstream. Your top underground artist is found by taking your top
