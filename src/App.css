@@ -130,7 +130,7 @@ p {
     vertical-align: middle;
     white-space: pre-line;
     position: inherit;
-    bottom: 250px;
+    bottom: 312px;
 }
 
 .home-small {
@@ -171,7 +171,7 @@ p {
 
 .player {
     position: relative;
-    bottom: 235px;
+    bottom: 297px;
     z-index: 10;
     box-sizing: border-box;
     width: 100%;
